@@ -1,0 +1,5 @@
+#!/bin/bash
+D=`date +'Min Hemliga Nyckel%Y-%m-%d %H:%M'`
+APPKEY=`echo -n $D|sha1sum|cut -d ' ' -f 1`
+curl -H "Content-type: application/json" \
+-X POST http://127.0.0.1:5000/messages -d '{"appkey":"'${APPKEY}'"}'
