@@ -3,6 +3,7 @@ import datetime, hashlib
 
 APPKEY = "Superhemlig nyckel"
 PORT = 5000
+HOST = "0.0.0.0"
 app = Flask(__name__)
 
 def get_inventory(article_id, amount):
@@ -78,4 +79,4 @@ def api_order_state():
         return Response('400 ERROR', status=400)
 
 if __name__ == '__main__':
-    app.run(port=PORT)
+    app.run(host=HOST, port=PORT)
