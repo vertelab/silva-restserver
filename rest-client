@@ -1,7 +1,9 @@
 #!/bin/bash
 D=`date -u +'Superhemlig nyckel%Y-%m-%d %H:%M:%S'`
 D=${D:0:${#D}-1}
-APPKEY=`echo -n $D|sha1sum|cut -d ' ' -f 1`
+echo $D
+APPKEY=`echo -n $D|sha256sum|cut -d ' ' -f 1`
+echo $APPKEY
 curl -H "Content-type: application/json" -X POST http://127.0.0.1:5000/inventory -d '{"appkey":"'${APPKEY}'","articles":{"1337":59,"1339":1}}' -i
 curl -H "Content-type: application/json" -X POST http://127.0.0.1:5000/order -d '{"appkey": "'${APPKEY}'", "order": 23}' -i
 echo $APPKEY

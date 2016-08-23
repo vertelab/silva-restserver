@@ -27,7 +27,7 @@ def get_order_state(order):
 
 def get_appkey(offset=0):
     print (datetime.datetime.utcnow() + datetime.timedelta(seconds=offset)).strftime("%Y-%m-%d %H:%M:%S")[:-1]
-    key = hashlib.sha1(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(seconds=offset)).strftime("%Y-%m-%d %H:%M:%S")[:-1]).hexdigest()
+    key = hashlib.sha256(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(seconds=offset)).strftime("%Y-%m-%d %H:%M:%S")[:-1]).hexdigest()
     print key
     return key
 
