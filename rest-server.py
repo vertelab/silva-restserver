@@ -151,19 +151,19 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2sql(
     sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
     conn = cursor = None
     res = "SQL Error"
-    try:
+    #~ try:
         conn =pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()[0]
         conn.commit()
-    except:
-        raise Warning('Failure in SQL connection.')
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+    #~ except:
+        #~ raise Warning('Failure in SQL connection.')
+    #~ finally:
+    if cursor:
+        cursor.close()
+    if conn:
+        conn.close()
     return res
 
 @app.route('/inventory', methods = ['POST'])
