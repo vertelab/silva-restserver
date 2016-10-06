@@ -8,9 +8,9 @@ HOST = "0.0.0.0"
 app = Flask(__name__)
 
 MSSQL_SERVER = 'localhost'
-MSSQL_USER = 'WebSQL'
-MSSQL_PWD = 'Web2Use!'
-MSSQL_DB = 'Silva_Test'
+MSSQL_USER = ''
+MSSQL_PWD = ''
+MSSQL_DB = ''
 
 def get_appkey(offset=0):
     key = hashlib.sha256(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(minutes=offset)).strftime("%Y-%m-%d %H:%M")).hexdigest()
@@ -34,86 +34,98 @@ def py2sql(val):
 
 def get_inventory(articles):
     sql="Declare @Item ISE_TblItemQty;"
-    for article_id in articles:
+    for article in articles:
         sql += "INSERT INTO @Item(ItemId,Unit,Quantity,CompanyCode) VALUES ('%s',NULL,%s,10);" % py2sql((article['ItemId'], article.get('Unit'), article['Quantity']))
     sql += "EXEC q_ise_2web_GetItemBalance @Tbl_ItemQty = @Item;"
     inventory = []
-    with pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(sql)
+    try:
+        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        res = cursor.fetchone()
+        while res:
+            item = {
+                'ItemId': res[0],
+                'Unit': res[1],
+                'Quantity': res[2],
+                'QuantityAvailable': res[3],
+                'CompanyCode': res[4],
+            }
             res = cursor.fetchone()
-            while res:
-                item = {
-                    'ItemId': res[0],
-                    'Unit': res[1],
-                    'Quantity': res[2],
-                    'QuantityAvailable': res[3],
-                    'CompanyCode': res[4],
-                }
-                res = cursor.fetchone()
+    except:
+        raise Warning('Failure in SQL connection.')
+    finally:
+        cursor.close()
+        conn.close()
     return inventory
 
 def get_order_state(order):
     headers = []
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;" % py2sql((order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb')))
-    with pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB) as conn:
-        with conn.cursor() as cursor:
+    try:
+    conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        res = cursor.fetchone()
+        while res:
+            head = {
+                'CompanyCode': res[0],
+                'OrderNo': res[1],
+                'OrderIdWeb': res[2],
+                'AmountExclTax': res[3],
+                'AmountInclTax': res[4],
+                'Currency': res[5],
+                'StatusCode': res[6],
+                'Status': res[7],
+                'PaymentTermsCode': res[8],
+                'PaymentTerms': res[9],
+                'DeliverytypeCode': res[10],
+                'Deliverytype': res[11],
+                'CustomerRef': res[12],
+                'OrderDate': res[13],
+                'ExpDeliveryDate': res[14],
+                'OurRef': res[15],
+                'OrderTypeCode': res[16],
+                'OrderType': res[17],
+                'WebOrderNo': res[18],
+                'CreatedDate': res[19],
+            }
+            headers.append[head]
+            res = cursor.fetchone()
+        rows = []
+        if order.get('OrderNo'):
+            sql = "EXEC q_GetOrderRows2Web  @OrderNo = %s, @CompanyCode = 10;" % py2sql(order.get('OrderNo'))
             cursor.execute(sql)
             res = cursor.fetchone()
             while res:
-                head = {
+                row = {
                     'CompanyCode': res[0],
-                    'OrderNo': res[1],
-                    'OrderIdWeb': res[2],
-                    'AmountExclTax': res[3],
-                    'AmountInclTax': res[4],
-                    'Currency': res[5],
-                    'StatusCode': res[6],
-                    'Status': res[7],
-                    'PaymentTermsCode': res[8],
-                    'PaymentTerms': res[9],
-                    'DeliverytypeCode': res[10],
-                    'Deliverytype': res[11],
-                    'CustomerRef': res[12],
-                    'OrderDate': res[13],
-                    'ExpDeliveryDate': res[14],
-                    'OurRef': res[15],
-                    'OrderTypeCode': res[16],
-                    'OrderType': res[17],
-                    'WebOrderNo': res[18],
-                    'CreatedDate': res[19],
+                    'OrderRowNo': res[1],
+                    'RowIdWeb': res[2],
+                    'ItemId': res[3],
+                    'ItemDescr': res[4],
+                    'Quantity': res[5],
+                    'Unit': res[6],
+                    'AmountExltax': res[7],
+                    'TaxCode': res[8],
+                    'Tax': res[9],
+                    'DeliveredQty': res[10],
+                    'RemaningQty': res[11],
+                    'InvoicedQty': res[12],
+                    'DeliveryDate': res[13],
+                    'Discount': res[14],
+                    'Note': res[15],
+                    'StatusCode': res[16],
+                    'Status': res[17],
                 }
-                headers.append[head]
+                rows.append(row)
                 res = cursor.fetchone()
-            rows = []
-            if order.get('OrderNo'):
-                sql = "EXEC q_GetOrderRows2Web  @OrderNo = %s, @CompanyCode = 10;" % py2sql(order.get('OrderNo'))
-                cursor.execute(sql)
-                res = cursor.fetchone()
-                while res:
-                    row = {
-                        'CompanyCode': res[0],
-                        'OrderRowNo': res[1],
-                        'RowIdWeb': res[2],
-                        'ItemId': res[3],
-                        'ItemDescr': res[4],
-                        'Quantity': res[5],
-                        'Unit': res[6],
-                        'AmountExltax': res[7],
-                        'TaxCode': res[8],
-                        'Tax': res[9],
-                        'DeliveredQty': res[10],
-                        'RemaningQty': res[11],
-                        'InvoicedQty': res[12],
-                        'DeliveryDate': res[13],
-                        'Discount': res[14],
-                        'Note': res[15],
-                        'StatusCode': res[16],
-                        'Status': res[17],
-                    }
-                    rows.append(row)
-                    res = cursor.fetchone()
-            return headers, rows
+    except:
+        raise Warning('Failure in SQL connection.')
+    finally:
+        cursor.close()
+        conn.close()
+    return headers, rows
 
 def place_order(order):
     head = order['head']
@@ -128,23 +140,19 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2mssql(
     )
     for row in rows:
         sql += "INSERT INTO @Rows(OrderIdWeb,RowIdWeb,ItemId,Quantity,CompanyCode) VALUES (%s,%s,%s,%s,10);" % py2sql((
-            article['OrderIdWeb'], article['RowIdWeb'], article['ItemId'], article['Quantity']))
-    sql += "EXEC q_ise_2web_GetItemBalance @Tbl_ItemQty = @Item;"
-    inventory = []
-    with pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(sql)
-            res = cursor.fetchone()
-            while res:
-                item = {
-                    'ItemId': res[0],
-                    'Unit': res[1],
-                    'Quantity': res[2],
-                    'QuantityAvailable': res[3],
-                    'CompanyCode': res[4],
-                }
-                res = cursor.fetchone()
-    return inventory
+            head['OrderIdWeb'], row['RowIdWeb'], row['ItemId'], row['Quantity']))
+    sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
+    try:
+        conn =pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        res = cursor.fetchone()[0]
+    except:
+        raise Warning('Failure in SQL connection.')
+    finally:
+        cursor.close()
+        conn.close()
+    return res
 
 @app.route('/inventory', methods = ['POST'])
 def api_inventory():
@@ -169,10 +177,11 @@ def api_order_info():
         if request.headers['Content-Type'] == 'application/json':
             if check_appkey(request.json['appkey']):
                 order = request.json['order']
+                head, rows = get_order_state(order)
                 data = json.dumps({
                     'appkey': get_appkey(),
                     'order': order,
-                    'state': get_order_state(order),
+                    'result': {'head': head, 'rows': rows},
                 })
                 return Response(data, status=200, mimetype='application/json')
             else:
@@ -191,7 +200,7 @@ def api_place_order():
                 data = json.dumps({
                     'appkey': get_appkey(),
                     'order': order,
-                    'state': get_order_state(order),
+                    'result': place_order(order),
                 })
                 return Response(data, status=200, mimetype='application/json')
             else:
