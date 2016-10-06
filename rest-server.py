@@ -139,7 +139,7 @@ def place_order(order):
     rows = order['rows']
     sql="""DECLARE @Header ISE_TblOrderHeader;
 INSERT INTO @Header(OrderIdWeb,CustomerId,Address1,Address2,Address3,Address4,PostalCode,CountryCode,OrderReference,YourReference,OrderComment,Currency,CompanyCode) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,10);
-DECLARE @Rows ISE_TblOrderRow;""" % py2mssql(
+DECLARE @Rows ISE_TblOrderRow;""" % py2sql(
         (head['OrderIdWeb'], head.get('CustomerId'), head.get('Address1'),
         head.get('Address2'), head.get('Address3'), head.get('Address4'),
         head.get('PostalCode'), head.get('CountryCode'), head.get('OrderReference'),
