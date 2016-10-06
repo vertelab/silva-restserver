@@ -6,5 +6,5 @@ echo $APPKEY
 #127.0.0.1
 #verdandi.silva.se
 curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/inventory -d '{"appkey":"'${APPKEY}'","articles":[{"ItemId":"1337","Quantity":1}]}' -i
-curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/order -d '{"appkey": "'${APPKEY}'", "order": 23}' -i
+#curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/order -d '{"appkey": "'${APPKEY}'", "order": 23}' -i
 echo $APPKEY
