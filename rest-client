@@ -8,7 +8,7 @@ echo $APPKEY
 curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/inventory -d '{"appkey":"'${APPKEY}'","articles":[{"ItemId":"21120","Quantity":1}]}' -i
 echo 
 echo
-curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/place_order -d '{"appkey": "'${APPKEY}'", "order": {"head":{"OrderIdWeb": "123"},"rows":[{"RowIdWeb": "52", "ItemId": "21120", "Quantity": 3}]}}' -i
+curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/place_order -d '{"appkey": "'${APPKEY}'", "order": {"head":{"OrderIdWeb": 120, "CustomerId": "12345"},"rows":[{"RowIdWeb": 57, "ItemId": "21120", "Quantity": 1.0}]}}' -i
 echo 
 curl -H "Content-type: application/json" -X POST http://verdandi.silva.se:5000/order_info -d '{"appkey": "'${APPKEY}'", "order": {"OrderIdWeb": "123"}}' -i
 echo $APPKEY

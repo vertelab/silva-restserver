@@ -11,6 +11,7 @@ MSSQL_SERVER = 'localhost'
 MSSQL_USER = ''
 MSSQL_PWD = ''
 MSSQL_DB = ''
+MSSQL_CHARSET = 'ISO-8859-1'
 
 def get_appkey(offset=0):
     key = hashlib.sha256(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(minutes=offset)).strftime("%Y-%m-%d %H:%M")).hexdigest()
@@ -28,7 +29,7 @@ def py2sql(val):
         return tuple([py2sql(v) for v in val])
     elif val == None:
         return 'NULL'
-    elif type(val) == type(str()):
+    elif type(val) in [type(str()), type(unicode())]:
         return "'%s'" % val
     return val
 
@@ -40,7 +41,7 @@ def get_inventory(articles):
     inventory = []
     conn = cursor = None
     try:
-        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()
@@ -68,7 +69,7 @@ def get_order_state(order):
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;" % py2sql((order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb')))
     conn = cursor = None
     try:
-        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()
@@ -151,19 +152,20 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2sql(
     sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
     conn = cursor = None
     res = "SQL Error"
-    #~ try:
-        conn =pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+    try:
+        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()[0]
-        conn.commit()
-    #~ except:
-        #~ raise Warning('Failure in SQL connection.')
-    #~ finally:
-    if cursor:
-        cursor.close()
-    if conn:
-        conn.close()
+        if res == ' ':
+            conn.commit()
+    except:
+        raise Warning('Failure in SQL connection.')
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     return res
 
 @app.route('/inventory', methods = ['POST'])
@@ -185,42 +187,42 @@ def api_inventory():
 
 @app.route('/order_info', methods = ['POST'])
 def api_order_info():
-    #~ try:
-    if request.headers['Content-Type'] == 'application/json':
-        if check_appkey(request.json['appkey']):
-            order = request.json['order']
-            head, rows = get_order_state(order)
-            data = json.dumps({
-                'appkey': get_appkey(),
-                'order': order,
-                'result': {'head': head, 'rows': rows},
-            })
-            return Response(data, status=200, mimetype='application/json')
-            #~ else:
-                #~ return Response('500 Permission denied', status=500)
-        #~ else:
-            #~ return Response("415 Unsupported Media Type!", status=415)
-    #~ except:
-        #~ return Response('400 ERROR', status=400)
+    try:
+        if request.headers['Content-Type'] == 'application/json':
+            if check_appkey(request.json['appkey']):
+                order = request.json['order']
+                head, rows = get_order_state(order)
+                data = json.dumps({
+                    'appkey': get_appkey(),
+                    'order': order,
+                    'result': {'head': head, 'rows': rows},
+                })
+                return Response(data, status=200, mimetype='application/json')
+            else:
+                return Response('500 Permission denied', status=500)
+        else:
+            return Response("415 Unsupported Media Type!", status=415)
+    except:
+        return Response('400 ERROR', status=400)
 
 @app.route('/place_order', methods = ['POST'])
 def api_place_order():
-    #~ try:
-    if request.headers['Content-Type'] == 'application/json':
-        if check_appkey(request.json['appkey']):
-            order = request.json['order']
-            data = json.dumps({
-                'appkey': get_appkey(),
-                'order': order,
-                'result': place_order(order),
-            })
-            return Response(data, status=200, mimetype='application/json')
-            #~ else:
-                #~ return Response('500 Permission denied', status=500)
-        #~ else:
-            #~ return Response("415 Unsupported Media Type!", status=415)
-    #~ except:
-        #~ return Response('400 ERROR', status=400)
+    try:
+        if request.headers['Content-Type'] == 'application/json':
+            if check_appkey(request.json['appkey']):
+                order = request.json['order']
+                data = json.dumps({
+                    'appkey': get_appkey(),
+                    'order': order,
+                    'result': place_order(order),
+                })
+                return Response(data, status=200, mimetype='application/json')
+            else:
+                return Response('500 Permission denied', status=500)
+        else:
+            return Response("415 Unsupported Media Type!", status=415)
+    except:
+        return Response('400 ERROR', status=400)
 
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT)
