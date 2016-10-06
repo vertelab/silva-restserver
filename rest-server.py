@@ -52,17 +52,21 @@ def get_inventory(articles):
                 'QuantityAvailable': res[3],
                 'CompanyCode': res[4],
             }
+            inventory.append(item)
             res = cursor.fetchone()
     except:
         raise Warning('Failure in SQL connection.')
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     return inventory
 
 def get_order_state(order):
     headers = []
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;" % py2sql((order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb')))
+    conn = cursor = None
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
@@ -124,8 +128,10 @@ def get_order_state(order):
     except:
         raise Warning('Failure in SQL connection.')
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     return headers, rows
 
 def place_order(order):
@@ -143,34 +149,39 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2mssql(
         sql += "INSERT INTO @Rows(OrderIdWeb,RowIdWeb,ItemId,Quantity,CompanyCode) VALUES (%s,%s,%s,%s,10);" % py2sql((
             head['OrderIdWeb'], row['RowIdWeb'], row['ItemId'], row['Quantity']))
     sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
+    conn = cursor = None
+    res = "SQL Error"
     try:
         conn =pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()[0]
+        conn.commit()
     except:
         raise Warning('Failure in SQL connection.')
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     return res
 
 @app.route('/inventory', methods = ['POST'])
 def api_inventory():
-    #~ try:
-    if request.headers['Content-Type'] == 'application/json':
-        if check_appkey(request.json['appkey']):
-            data = json.dumps({
-                'appkey': get_appkey(),
-                'inventory': get_inventory(request.json.get('articles', {})),
-            })
-            return Response(data, status=200, mimetype='application/json')
-            #~ else:
-                #~ return Response('500 Permission denied', status=500)
-        #~ else:
-            #~ return Response("415 Unsupported Media Type!", status=415)
-    #~ except:
-        #~ return Response('400 ERROR', status=400)
+    try:
+        if request.headers['Content-Type'] == 'application/json':
+            if check_appkey(request.json['appkey']):
+                data = json.dumps({
+                    'appkey': get_appkey(),
+                    'inventory': get_inventory(request.json.get('articles', {})),
+                })
+                return Response(data, status=200, mimetype='application/json')
+            else:
+                return Response('500 Permission denied', status=500)
+        else:
+            return Response("415 Unsupported Media Type!", status=415)
+    except:
+        return Response('400 ERROR', status=400)
 
 @app.route('/order_info', methods = ['POST'])
 def api_order_info():
