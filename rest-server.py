@@ -36,7 +36,7 @@ def py2sql(val):
 def get_inventory(articles):
     sql="Declare @Item ISE_TblItemQty;"
     for article in articles:
-        sql += "INSERT INTO @Item(ItemId,Unit,Quantity,CompanyCode) VALUES ('%s',%s,%s,10);" % py2sql((article['ItemId'], article.get('Unit'), article['Quantity']))
+        sql += "INSERT INTO @Item(ItemId,Unit,Quantity,CompanyCode) VALUES (%s,%s,%s,10);" % py2sql((article['ItemId'], article.get('Unit'), article['Quantity']))
     sql += "EXEC q_ise_2web_GetItemBalance @Tbl_ItemQty = @Item;"
     inventory = []
     conn = cursor = None
