@@ -185,42 +185,42 @@ def api_inventory():
 
 @app.route('/order_info', methods = ['POST'])
 def api_order_info():
-    try:
-        if request.headers['Content-Type'] == 'application/json':
-            if check_appkey(request.json['appkey']):
-                order = request.json['order']
-                head, rows = get_order_state(order)
-                data = json.dumps({
-                    'appkey': get_appkey(),
-                    'order': order,
-                    'result': {'head': head, 'rows': rows},
-                })
-                return Response(data, status=200, mimetype='application/json')
-            else:
-                return Response('500 Permission denied', status=500)
-        else:
-            return Response("415 Unsupported Media Type!", status=415)
-    except:
-        return Response('400 ERROR', status=400)
+    #~ try:
+    if request.headers['Content-Type'] == 'application/json':
+        if check_appkey(request.json['appkey']):
+            order = request.json['order']
+            head, rows = get_order_state(order)
+            data = json.dumps({
+                'appkey': get_appkey(),
+                'order': order,
+                'result': {'head': head, 'rows': rows},
+            })
+            return Response(data, status=200, mimetype='application/json')
+            #~ else:
+                #~ return Response('500 Permission denied', status=500)
+        #~ else:
+            #~ return Response("415 Unsupported Media Type!", status=415)
+    #~ except:
+        #~ return Response('400 ERROR', status=400)
 
 @app.route('/place_order', methods = ['POST'])
 def api_place_order():
-    try:
-        if request.headers['Content-Type'] == 'application/json':
-            if check_appkey(request.json['appkey']):
-                order = request.json['order']
-                data = json.dumps({
-                    'appkey': get_appkey(),
-                    'order': order,
-                    'result': place_order(order),
-                })
-                return Response(data, status=200, mimetype='application/json')
-            else:
-                return Response('500 Permission denied', status=500)
-        else:
-            return Response("415 Unsupported Media Type!", status=415)
-    except:
-        return Response('400 ERROR', status=400)
+    #~ try:
+    if request.headers['Content-Type'] == 'application/json':
+        if check_appkey(request.json['appkey']):
+            order = request.json['order']
+            data = json.dumps({
+                'appkey': get_appkey(),
+                'order': order,
+                'result': place_order(order),
+            })
+            return Response(data, status=200, mimetype='application/json')
+            #~ else:
+                #~ return Response('500 Permission denied', status=500)
+        #~ else:
+            #~ return Response("415 Unsupported Media Type!", status=415)
+    #~ except:
+        #~ return Response('400 ERROR', status=400)
 
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT)
