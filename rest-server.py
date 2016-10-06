@@ -63,7 +63,7 @@ def get_order_state(order):
     headers = []
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;" % py2sql((order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb')))
     try:
-    conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
+        conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
         cursor.execute(sql)
         res = cursor.fetchone()
