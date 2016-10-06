@@ -156,20 +156,20 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2mssql(
 
 @app.route('/inventory', methods = ['POST'])
 def api_inventory():
-    try:
-        if request.headers['Content-Type'] == 'application/json':
-            if check_appkey(request.json['appkey']):
-                data = json.dumps({
-                    'appkey': get_appkey(),
-                    'inventory': get_inventory(request.json.get('articles', {})),
-                })
-                return Response(data, status=200, mimetype='application/json')
-            else:
-                return Response('500 Permission denied', status=500)
-        else:
-            return Response("415 Unsupported Media Type!", status=415)
-    except:
-        return Response('400 ERROR', status=400)
+    #~ try:
+    if request.headers['Content-Type'] == 'application/json':
+        if check_appkey(request.json['appkey']):
+            data = json.dumps({
+                'appkey': get_appkey(),
+                'inventory': get_inventory(request.json.get('articles', {})),
+            })
+            return Response(data, status=200, mimetype='application/json')
+            #~ else:
+                #~ return Response('500 Permission denied', status=500)
+        #~ else:
+            #~ return Response("415 Unsupported Media Type!", status=415)
+    #~ except:
+        #~ return Response('400 ERROR', status=400)
 
 @app.route('/order_info', methods = ['POST'])
 def api_order_info():
