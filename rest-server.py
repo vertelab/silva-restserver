@@ -12,6 +12,7 @@ MSSQL_USER = ''
 MSSQL_PWD = ''
 MSSQL_DB = ''
 MSSQL_CHARSET = 'ISO-8859-1'
+DEBUG = True
 
 def get_appkey(offset=0):
     key = hashlib.sha256(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(minutes=offset)).strftime("%Y-%m-%d %H:%M")).hexdigest()
@@ -40,6 +41,8 @@ def get_inventory(articles):
     sql += "EXEC q_ise_2web_GetItemBalance @Tbl_ItemQty = @Item;"
     inventory = []
     conn = cursor = None
+    if DEBUG:
+        print sql
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
@@ -68,6 +71,8 @@ def get_order_state(order):
     headers = []
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;" % py2sql((order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb')))
     conn = cursor = None
+    if DEBUG:
+        print sql
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
@@ -101,6 +106,8 @@ def get_order_state(order):
         rows = []
         if order.get('OrderNo'):
             sql = "EXEC q_GetOrderRows2Web  @OrderNo = %s, @CompanyCode = 10;" % py2sql(order.get('OrderNo'))
+            if DEBUG:
+                print sql
             cursor.execute(sql)
             res = cursor.fetchone()
             while res:
@@ -152,6 +159,8 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2sql(
     sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
     conn = cursor = None
     res = "SQL Error"
+    if DEBUG:
+        print sql
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB, charset=MSSQL_CHARSET)
         cursor = conn.cursor()
