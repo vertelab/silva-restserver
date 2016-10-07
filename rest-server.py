@@ -1,18 +1,11 @@
 from flask import Flask, url_for, request, json, Response
 import datetime, hashlib
 import pymssql
+import sys
 
-APPKEY = "Superhemlig nyckel"
-PORT = 5000
-HOST = "0.0.0.0"
+from settings import *
+
 app = Flask(__name__)
-
-MSSQL_SERVER = 'localhost'
-MSSQL_USER = ''
-MSSQL_PWD = ''
-MSSQL_DB = ''
-MSSQL_CHARSET = 'ISO-8859-1'
-DEBUG = True
 
 def get_appkey(offset=0):
     key = hashlib.sha256(APPKEY + (datetime.datetime.utcnow() - datetime.timedelta(minutes=offset)).strftime("%Y-%m-%d %H:%M")).hexdigest()
@@ -65,6 +58,7 @@ def get_inventory(articles):
             cursor.close()
         if conn:
             conn.close()
+    sys.stdout.flush()
     return inventory
 
 def get_order_state(order):
@@ -140,6 +134,7 @@ def get_order_state(order):
             cursor.close()
         if conn:
             conn.close()
+    sys.stdout.flush()
     return headers, rows
 
 def place_order(order):
@@ -175,6 +170,7 @@ DECLARE @Rows ISE_TblOrderRow;""" % py2sql(
             cursor.close()
         if conn:
             conn.close()
+    sys.stdout.flush()
     return res
 
 @app.route('/inventory', methods = ['POST'])
