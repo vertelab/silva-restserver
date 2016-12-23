@@ -2,6 +2,7 @@ from flask import Flask, url_for, request, json, Response
 import datetime, hashlib
 import pymssql
 import sys
+from gevent.wsgi import WSGIServer
 
 from settings import *
 
@@ -229,5 +230,5 @@ def api_place_order():
     except:
         return Response('400 ERROR', status=400)
 
-if __name__ == '__main__':
-    app.run(host=HOST, port=PORT)
+http_server = WSGIServer((HOST, PORT), app)
+http_server.serve_forever()
