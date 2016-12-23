@@ -10,6 +10,8 @@ import codecs
 
 from settings import *
 
+logging.basicConfig(filename=LOGFILE, level=LOGLEVEL, format='%(asctime)s %(levelname)s: %(message)s')
+
 app = Flask(__name__)
 
 def get_appkey(offset=0):
