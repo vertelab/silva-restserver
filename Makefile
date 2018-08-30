@@ -15,7 +15,7 @@ rest-server.tmp:
 
 silva-restserver-test.tmp:
 	@sudo cp silva-restserver-test /etc/init.d
-	@sudo update-rc.d silva-restserver-test default
+	@sudo update-rc.d silva-restserver-test defaults
 	@touch silva-restserver-test.tmp
 
 rest-server-test.tmp:
