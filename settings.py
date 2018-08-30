@@ -8,3 +8,6 @@ DEBUG = True
 APPKEY = "Superhemlig nyckel"
 PORT = 5000
 HOST = "0.0.0.0"
+
+LOGFILE = '/var/log/silva-restserver.log'
+LOGLEVEL = 'DEBUG'
