@@ -20,6 +20,7 @@ def check_appkey(appkey):
     for offset in [0, -1, 1]:
         if appkey == get_appkey(offset):
             return True
+    logging.debug("Authentication failed! appkey: %s" % appkey)
     return False
 
 def get_inventory(articles):
@@ -32,7 +33,8 @@ def get_inventory(articles):
     inventory = []
     conn = cursor = None
     data = tuple(data)
-    logging.debug(sql % data)
+    logging.debug(sql)
+    logging.debug(data)
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor(as_dict=True)
@@ -60,7 +62,8 @@ def get_order_state(order):
     sql = "EXEC q_ise_2web_GetOrders @CustomerNo = %s, @OrderNo = %s, @OrderIdWeb = %s, @CompanyCode = 10;"
     data = (order.get('CustomerNo'), order.get('OrderNo'), order.get('OrderIdWeb'))
     conn = cursor = None
-    logging.debug(sql % data)
+    logging.debug(sql)
+    logging.debug(data)
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
@@ -95,7 +98,8 @@ def get_order_state(order):
                 if order.get('OrderNo') or head.get('OrderNo'):
                     sql = "EXEC q_ise_2web_GetOrderRows  @OrderNo = %s;"
                     data = (order.get('OrderNo') or head.get('OrderNo'))
-                    logging.debug(sql % data)
+                    logging.debug(sql)
+                    logging.debug(data)
                     cursor.execute(sql, data)
                     res = cursor.fetchone()
                     while res:
@@ -150,7 +154,9 @@ DECLARE @Rows ISE_TblOrderRow;"""
     sql += "EXEC q_ISE_Web_IntegrateOrder @tblOrderHeader = @Header, @tblOrderRow = @Rows;"
     conn = cursor = None
     result = "SQL Error"
-    logging.debug(sql % data)
+    data = tuple(data)
+    logging.debug(sql)
+    logging.debug(data)
     try:
         conn = pymssql.connect(host=MSSQL_SERVER, user=MSSQL_USER, password=MSSQL_PWD, database=MSSQL_DB)
         cursor = conn.cursor()
