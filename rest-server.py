@@ -168,7 +168,7 @@ DECLARE @Rows ISE_TblOrderRow;"""
             e = sys.exc_info()
             msg = traceback.format_exception(e[0], e[1], e[2])
             logging.warn(''.join(msg))
-            result = u'Fel vid orderläggning!'
+            result = 'Fel vid orderläggning!'
     except:
         e = sys.exc_info()
         msg = traceback.format_exception(e[0], e[1], e[2])
@@ -254,24 +254,24 @@ if __name__ == "__main__":
    try:
       opts, args = getopt.getopt(sys.argv[1:],"th",["test",'help'])
    except getopt.GetoptError:
-      print 'rest-server.py -t | --test '
+      print('rest-server.py -t | --test ')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print 'test.py -i <inputfile> -o <outputfile>'
+         print('test.py -i <inputfile> -o <outputfile>')
          sys.exit()
       elif opt in ("-t", "--test"):
          test = True
       elif opt in ("-o", "--ofile"):
          outputfile = arg
 
-   print sys.argv,opts,args
+   print(sys.argv,opts,args)
    if not test:
       from settings import LOGFILE,LOGLEVEL,MSSQL_SERVER,MSSQL_USER,MSSQL_PWD,MSSQL_DB,MSSQL_CHARSET,APPKEY,PORT,HOST
    else:
       from settings_test import LOGFILE,LOGLEVEL,MSSQL_SERVER,MSSQL_USER,MSSQL_PWD,MSSQL_DB,MSSQL_CHARSET,APPKEY,PORT,HOST
 
-   print LOGFILE,LOGLEVEL,MSSQL_SERVER,MSSQL_USER,MSSQL_PWD,MSSQL_DB,MSSQL_CHARSET,APPKEY,PORT,HOST
+   print(LOGFILE,LOGLEVEL,MSSQL_SERVER,MSSQL_USER,MSSQL_PWD,MSSQL_DB,MSSQL_CHARSET,APPKEY,PORT,HOST)
 
    logging.basicConfig(filename=LOGFILE, level=LOGLEVEL, format='%(asctime)s %(levelname)s: %(message)s')
    http_server = WSGIServer((HOST, PORT), app)
