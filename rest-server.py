@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, url_for, request, json, Response
 from gevent.wsgi import WSGIServer
