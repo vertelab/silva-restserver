@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, url_for, request, json, Response
-from gevent.wsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 import datetime, hashlib
 import pymssql
 import logging
